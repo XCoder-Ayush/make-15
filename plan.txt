@@ -1,0 +1,22 @@
+gameId
+player1Id
+player2Id
+list of moves
+currentMoveNumber
+
+Create Room :
+->Create game id which is the socket room id using uuid and accept userId
+->Hit the DB to post a game with id as the created id and in place of user1 as the got userId
+->return the game id and redirect to game page where other player has'nt joined yet
+
+Join Room:
+Let's handle edge cases first
+->When user directly hits game link, if userId is undefined redirect to home page 
+->Now in join room enter room id and userId, 
+    ->Room does'nt exist
+    ->No permission to join room if not in DB as P1/P2 
+
+->when P1 is registered and P2 joins in correct roomID
+
+
+When someone hits the link 

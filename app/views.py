@@ -3,7 +3,6 @@ import re
 from flask import render_template, request, redirect, url_for, session, flash, Blueprint
 from flask_login import login_required, login_user, logout_user, current_user
 
-
 from .extension import db
 from .models import User
 
@@ -65,16 +64,24 @@ def register():
     return render_template("register.html", msg=msg)
 
 
+# @main.route("/")
+# def home():
+#     # Check if user is loggedin
+#     if "_user_id" in session:
+#         # User is loggedin show them the home page
+#         return render_template(
+#             "home.html", username=User.query.filter_by(id=session["_user_id"]).first()
+#         )
+#     # User is not loggedin redirect to login page
+#     return redirect(url_for("main.login"))
+
 @main.route("/")
 def home():
-    # Check if user is loggedin
-    if "_user_id" in session:
-        # User is loggedin show them the home page
-        return render_template(
-            "home.html", username=User.query.filter_by(id=session["_user_id"]).first()
-        )
-    # User is not loggedin redirect to login page
-    return redirect(url_for("main.login"))
+    return render_template("visit.html")
+
+@main.route('/game/<string:room_id>', methods=['GET'])
+def sendIndex(room_id):
+    return render_template("index.html",room_id=room_id)
 
 
 @main.route("/profile")

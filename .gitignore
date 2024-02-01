@@ -1,14 +1,30 @@
-*venv/
+# Ignore virtual environment
+venv/
 
+# Ignore Python bytecode
+app/__pycache__/
+
+tests/__pycache__/
+tests/.pytest_cache/
+
+# Ignore environment variables file
+.env
+
+# Ignore database files
+instance/*.db
+
+# Ignore compiled Python files
 *.pyc
-__pycache__/
+*.pyo
+*.pyd
 
-instance/
+# Ignore logs and other generated files
+logs/
+*.log
 
-.pytest_cache/
-.coverage
-htmlcov/
+# Ignore editor-specific files
+.vscode/
+.idea/
 
-dist/
-build/
-*.egg-info/
+# Ignore configuration files
+*.cfg

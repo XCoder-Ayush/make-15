@@ -1,0 +1,106 @@
+<!--
+  This example requires some changes to your config:
+  
+  ```
+  // tailwind.config.js
+  module.exports = {
+    // ...
+    plugins: [
+      // ...
+      require('@tailwindcss/forms'),
+    ],
+  }
+  ```
+-->
+<!--
+  This example requires updating your template:
+
+  ```
+  <html class="h-full bg-white">
+  <body class="h-full">
+  ```
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome To Make 15</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        let socket=undefined
+        document.addEventListener('DOMContentLoaded',async()=>{
+            const URL='http://' + document.domain + ':' + location.port;
+            console.log(URL);
+
+            socket = await io.connect(URL);
+
+            document.querySelector('#create-room').addEventListener('click',()=>{
+                createRoom();
+            })
+
+            document.querySelector('#join-room').addEventListener('click',()=>{
+                joinRoom();
+            })
+
+            // Event handler for receiving room creation confirmation
+            socket.on('room_created', function(roomId) {
+                const link = `${URL}/game/${roomId}`
+                alert('Share this link:  ' + link);
+            });
+
+            // Event handler for receiving room join confirmation
+            socket.on('room_joined', function(roomId) {
+                alert('Joined room! Room ID: ' + roomId);
+            });
+        })
+
+
+        // Event handler for creating a new room
+        function createRoom() {
+            if(socket)socket.emit('create_room');
+        }
+
+        // Event handler for joining an existing room
+        function joinRoom(roomId) {
+            if(socket) socket.emit('join_room', roomId);
+        }
+
+
+    </script>
+</head>
+
+<body>
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <img class="mx-auto h-10 w-auto"
+                src="https://mathequalslove.net/wp-content/uploads/2023/02/magic-square-15-puzzle-featured-image-1024x1024.jpg"
+                alt="Your Company">
+            <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Hi from Make-15 (β Version)</h2>
+            <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">How will you like to
+                begin ?</h2>
+        </div>
+
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <div>
+                <button type="submit" id="create-room"
+                    class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-6 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    <i class="fa-solid fa-circle-plus fa-2xl mt-3 mr-3"></i> Create Room</button>
+            </div>
+
+            <div>
+                <button type="submit" id="join-room"
+                    class="mt-5 flex w-full justify-center rounded-md bg-red-600 px-3 py-6 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    <i class="fa-solid fa-plug fa-2xl mt-3 mr-3"></i>Join Room </button>
+            </div>
+        </div>
+    </div>
+
+
+    
+</body>
+</html>

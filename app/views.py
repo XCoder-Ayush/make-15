@@ -110,7 +110,24 @@ def create_game():
     moves = data.get('moves', [])
 
     # Create a new game object
-    new_game = Game(gameId=gameId, player1Id=player1Id, player2Id=player2Id, moves=moves)
+    new_game = Game(
+        gameId=gameId,
+        player1Id=player1Id,
+        player2Id=player2Id,
+        moves=moves,
+        pointsOfA=[0, 0],
+        pointsOfB=[0, 0],
+        pointsOfC=[0, 0],
+        pointsOfD=[0, 0],
+        pointsOfE=[0, 0],
+        pointsOfF=[0, 0],
+        pointsOfG=[0, 0],
+        pointsOfH=[0, 0],
+        pointsOfI=[0, 0],
+        winner=''
+    )
+
+
 
     # Insert the game document into the MongoDB 'games' collection
     games_collection = mongo.db.games

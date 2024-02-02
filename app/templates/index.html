@@ -11,23 +11,18 @@
     <script>
         let cellWhoseModalOpen = undefined;
         let numberSelectedInMove = undefined;
-        //Should Be Undefined
-        // let move = 1;
-        // let playerId = 1;
-
         let move = undefined;
         let playerId = undefined;
         let gameDetails = undefined;
+
         const URL = 'http://' + document.domain + ':' + location.port;
-        // console.log(URL);
-        // let socket = undefined;
         let socket = io(URL);
 
         document.addEventListener("DOMContentLoaded", runBeforeLoad);
         console.log('Upar')
-        console.log(socket)
+        // console.log(socket)
         async function runBeforeLoad() {
-            console.log('Andar')
+            // console.log('Andar')
 
             // const URL='http://' + document.domain + ':' + location.port;
             // console.log(URL);
@@ -35,10 +30,13 @@
             // socket = await io.connect(URL);
             // socket= await io();
 
-            // Join The Room: 
+
             const gameId = window.location.pathname.split('/').pop();
             socket.emit('join_room', { roomId: gameId, userId: localStorage.getItem('currentUser') });
 
+            /**
+             * Check If A Game With gameId exists in DB or not
+            */
             const apiUrl = `http://localhost:5000/api/games/${gameId}`;
             try {
                 const response = await fetch(apiUrl);
@@ -46,8 +44,18 @@
                 if (response.ok) {
                     gameDetails = await response.json();
                     console.log('Game Details:', gameDetails);
+
+                    // Game Id Should Contain The Current User In Its Record:
+                    let currentUser = localStorage.getItem('currentUser');
+                    if (!(gameDetails.player1Id == currentUser || gameDetails.player2Id == currentUser)) {
+                        console.error('Error:', response.statusText);
+                        //Not Authorized Room Id Send To Home
+                        window.location.href = 'http://localhost:5000';
+                        return;
+                    }
                 } else {
                     console.error('Error:', response.statusText);
+                    //Invalid Room Id Send To Home
                     window.location.href = 'http://localhost:5000';
                     return;
                 }
@@ -55,15 +63,24 @@
                 console.error('Error:', error);
             }
 
-            console.log(gameDetails);
 
+            // Join The Room: 
 
+            // console.log(gameDetails);
 
+            /**
+                Since @moves inside @gameDetails is an empty array with size 0 and @move logically starts with 1.
+             * 
+            */
             move = gameDetails.moves.length + 1
             playerId = localStorage.getItem('currentUser');
             console.log(playerId);
             console.log(move);
-            //Cancel Move
+
+            /**
+                Cancel Move
+             * 
+            */
             const closeModalBtn = document.querySelector("#close-modal");
             if (closeModalBtn) {
                 closeModalBtn.addEventListener("click", () => {
@@ -87,6 +104,7 @@
                 });
             }
 
+
             function createGridCell(ch, num) {
                 // console.log(ch + num);
                 const gridCell = document.createElement("div");
@@ -96,7 +114,6 @@
                     "h-auto w-auto border border-black shadow-lg p-4 flex items-center justify-center text-gray-300";
                 gridCell.textContent = `${ch.toUpperCase()}${num}`;
                 // gridCell.textContent = `${num}`;
-
                 return gridCell;
             }
 
@@ -118,37 +135,96 @@
 
             fillGrids();
 
+            putLock();
+        }
+
+        function putLock() {
             if ((playerId == gameDetails.player2Id && move % 2 == 1 || playerId == gameDetails.player1Id && move % 2 == 0)) {
-                console.log("Heyaaaaaaaaaaa");
+                console.log("Now, You Are Not Allowed To Make A Move");
                 const containerElement = document.querySelector("#game-grid");
                 if (containerElement) {
+                    containerElement.style.pointerEvents = "none";
                     containerElement.style.cursor = "not-allowed";
                 }
             }
         }
+
+        function openLock() {
+            if ((playerId == gameDetails.player2Id && move % 2 == 0) || (playerId == gameDetails.player1Id && move % 2 == 1)) {
+                console.log("Now, You Are Allowed To Make A Move");
+                const containerElement = document.querySelector("#game-grid");
+                if (containerElement) {
+                    containerElement.style.pointerEvents = "auto";
+                    containerElement.style.cursor = "pointer";
+                    console.log(containerElement);
+                }
+            }
+        }
+
         console.log('Bahaar')
+
         socket.on('room_joined', function (data) {
             const user_id = data.user_id;
             const room_id = data.room_id;
             const link = `${URL}/game/${room_id}`;
             console.log(`${user_id} joined the room ${room_id}`);
-            setTimeout(() => {
-                localStorage.setItem('currentUser', user_id);
-                // window.location.href = link;
-            }, 5000)
+            localStorage.setItem('currentUser', user_id);
         });
-        // if(socket){
-        //     socket.on('room_joined', function (data) {
-        //         const user_id = data.user_id;
-        //         const room_id = data.room_id;
-        //         const link = `${URL}/game/${room_id}`;
-        //         console.log(`${user_id} joined the room ${room_id}`);
-        //         setTimeout(() => {
-        //             localStorage.setItem('currentUser', user_id);
-        //             // window.location.href = link;
-        //         },5000)
-        //     });
-        // }
+
+        socket.on('get_registered_move', async (data) => {
+            console.log(data);
+            const opponent = data.playerId;
+            const roomId = data.roomId;
+            const cellModified = data.move;
+            const input = data.input;
+
+
+            frontEndManipulationOnOppMove(opponent, roomId, cellModified, input)
+
+            // Fetch Latest gameDetails from DB
+            const apiUrl = `http://localhost:5000/api/games/${roomId}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+
+                    gameDetails = await response.json();
+                    console.log('Updated Game Details:', gameDetails);
+
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+            move = gameDetails.moves.length + 1;
+
+
+            // Add Event Listeners To All Cells
+            for (let i = 1; i <= 9; i++) {
+                const ch = String.fromCharCode(i + 96);
+                for (let num = 1; num <= 9; num++) {
+                    let gridCell = document.querySelector(`#cell-${ch}${num}`);
+                    if ((playerId == gameDetails.player1Id && move % 2 == 1 || playerId == gameDetails.player2Id && move % 2 == 0)) {
+                        gridCell.addEventListener("click", () => {
+                            openModal(ch, num);
+                        });
+                    }
+                }
+            }
+
+            openLock();
+
+            // For Frontend Manipulation
+            if (gameDetails.player1Id == opponent) {
+                // POV : 2nd Player 
+                // Lock Should Be Opened:
+            } else {
+                // POV : 1st Player 
+                // Lock Should Be Opened
+            }
+        })
+
         function openModal(ch, num) {
             cellWhoseModalOpen = document.querySelector(`#cell-${ch}${num}`);
 
@@ -159,12 +235,12 @@
             for (let i = 1; i <= 9; i++) {
                 const gridCell = document.querySelector(`#cell-${ch}${i}`);
                 const content = gridCell.innerText;
-                console.log(content);
+                // console.log(content);
                 if (/^\d$/.test(content)) {
                     // If content is a single digit number
                     numbersNotAllowed.push(gridCell.innerText);
                 } else if (/^[A-I][1-9]$/.test(content)) {
-                    console.log("Fuckk");
+                    // console.log("Fuckk");
                 } else {
                     // Handle other cases if needed
                     console.log("Not Possible. Bug!!!");
@@ -205,8 +281,10 @@
                 // REST API Call After Adding Chosen Cell To moves array
                 console.log(cellWhoseModalOpen);
                 const id = cellWhoseModalOpen.id.split('-')[1];
+
                 gameDetails.moves.push(id)
 
+                // First Task To Update In DB
                 // PUT API Call
                 const apiUrl = `http://localhost:5000/api/games/${gameDetails.gameId}`;
 
@@ -232,33 +310,61 @@
 
 
                 // Socket Event Emit:
-                socket.emit('registered_move', { move: id, cellId: cellWhoseModalOpen.id });
+                socket.emit('register_move', { playerId: playerId, roomId: gameDetails.gameId, move: id, input: numberSelectedInMove });
 
 
                 // Frontend Manipulation:
-                cellWhoseModalOpen.innerText = numberSelectedInMove;
-                // Remove the abbrevation
-                cellWhoseModalOpen.classList.remove("text-gray-300");
-                // Add the regd move in the cell:
-                cellWhoseModalOpen.classList.add("text-black");
-                cellWhoseModalOpen.classList.add("font-bold");
+                frontEndManipulationOnOwnMove();
 
-                //RBRBRBRB
-                if (move & 1) {
-                    cellWhoseModalOpen.classList.add("bg-blue-100");
-                } else {
-                    cellWhoseModalOpen.classList.add("bg-red-100");
-                }
+                // Update gameDetails and move
+                // move updated after FrontEnd Manipulation
+                move = gameDetails.moves.length + 1;
 
-                cellWhoseModalOpen.style.cursor = "not-allowed";
-                cellWhoseModalOpen.style.pointerEvents = "none";
+                putLock();
 
-                closeModal();
 
-                move++;
+
             }
         }
 
+        function frontEndManipulationOnOwnMove() {
+            cellWhoseModalOpen.innerText = numberSelectedInMove;
+            // Remove the abbrevation
+            cellWhoseModalOpen.classList.remove("text-gray-300");
+            // Add the regd move in the cell:
+            cellWhoseModalOpen.classList.add("text-black");
+            cellWhoseModalOpen.classList.add("font-bold");
+
+            //RBRBRBRB
+            if (move & 1) {
+                cellWhoseModalOpen.classList.add("bg-blue-100");
+            } else {
+                cellWhoseModalOpen.classList.add("bg-red-100");
+            }
+
+            cellWhoseModalOpen.style.cursor = "not-allowed";
+            cellWhoseModalOpen.style.pointerEvents = "none";
+
+            closeModal();
+        }
+
+        function frontEndManipulationOnOppMove(opponent, roomId, cellModified, input) {
+            let cellToBeModified = document.querySelector(`#cell-${cellModified}`)
+            cellToBeModified.innerText = input;
+            // Remove the abbrevation
+            cellToBeModified.classList.remove("text-gray-300");
+            // Add the regd move in the cell:
+            cellToBeModified.classList.add("text-black");
+            cellToBeModified.classList.add("font-bold");
+            if (move & 1) {
+                cellToBeModified.classList.add("bg-blue-100");
+            } else {
+                cellToBeModified.classList.add("bg-red-100");
+            }
+            cellToBeModified.style.cursor = "not-allowed";
+            cellToBeModified.style.pointerEvents = "none";
+
+        }
         function toggleElementInModal(num) {
             // Remove All Classes:
             // console.log('HERE '+ num);

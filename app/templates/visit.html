@@ -65,10 +65,8 @@
             const room_id = data.room_id;
             const link = `${URL}/game/${room_id}`;
             console.log(`${user_id} joined the room ${room_id}`);
-            setTimeout(() => {
-                localStorage.setItem('currentUser', user_id);
-                window.location.href = link;
-            }, 5000)
+            localStorage.setItem('currentUser', user_id);
+            window.location.href = link;
         });
 
         // Event handler for creating a new room

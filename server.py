@@ -134,6 +134,57 @@ def handle_register_move(data):
     emit('get_registered_move', {'playerId': player_id, 'roomId': room_id, 'move': move, 'input': input_value}, room=room_id,include_self=False)
     
 
+@socketio.on('winning_check')
+def handle_winning_check(data):
+    patterns = [['a', 'd', 'g'], ['b', 'e', 'h'], ['c', 'f', 'i'], ['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['a', 'e', 'i'], ['c', 'e', 'g']]
+    moves = data.get('moves', [])
+    if not moves:
+        return
+    
+    cell_to_number_map = {}
+    for move in moves:
+        cell, number_input = move
+        cell_to_number_map[cell] = number_input
+
+    for pattern in patterns:
+        flag = 1  
+        for grid in pattern:
+            for num in range(1, 10):
+                cell = grid + str(num)
+                if cell not in cell_to_number_map:
+                    flag = 0
+                    break
+
+            if not flag:
+                break
+        if flag:
+            # If Player 1 Can Win:
+            canPlayer1Win = 1
+            for grid in pattern:
+                if data[f'pointsOf{grid.upper()}'][0] < data[f'pointsOf{grid.upper()}'][1]:
+                    canPlayer1Win=0
+                    break
+             
+            if canPlayer1Win:
+                # Player 1 Win Event
+                emit('wwcd', data.player1Id , room=data.gameId)
+                
+            canPlayer2Win = 1
+            for grid in pattern:
+                if data[f'pointsOf{grid.upper()}'][0] > data[f'pointsOf{grid.upper()}'][1]:
+                    canPlayer2Win=0
+                    break
+
+            if canPlayer2Win:
+                # Player 2 Win Event
+                emit('wwcd', data.player2Id , room=data.gameId)
+
+    if moves.length==81:
+        emit('draw',{'message':'Draw'}, room=data.gameId)
+
+    return
+
+
 # This event is triggered when a client disconnects from the server via WebSocket
 @socketio.on('disconnect')
 def handle_disconnect():

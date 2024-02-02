@@ -163,8 +163,11 @@ def update_game(gameId):
     # Score Calculation/Updates 
     final_updated_data = scoreCalculation(updated_data)
     final_updated_data.pop('_id', None)
-    # Winning Check:
 
+
+    # Winning Check:
+    # winningCheck(final_updated_data); 
+    # Can be done as a Webhook in future:
 
     # Update the game in the MongoDB 'games' collection
 
@@ -211,12 +214,64 @@ def scoreCalculation(updated_data):
             if flag:
                 if pattern_sum == 15:
                     score += 1
+
     print('***********************************************************************')
     print(updated_data)
-    
+
     if len(moves) % 2 == 1:
         updated_data[f'pointsOf{grid.upper()}'][0] += score
     else:
         updated_data[f'pointsOf{grid.upper()}'][1] += score
 
     return updated_data
+
+
+# def winningCheck(data):
+#     patterns = [['a', 'd', 'g'], ['b', 'e', 'h'], ['c', 'f', 'i'], ['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['a', 'e', 'i'], ['c', 'e', 'g']]
+#     moves = data.get('moves', [])
+#     # if not moves:
+#     #     return 'None'
+    
+#     cell_to_number_map = {}
+#     for move in moves:
+#         cell, number_input = move
+#         cell_to_number_map[cell] = number_input
+
+#     for pattern in patterns:
+#         flag = 1  
+#         pattern_sum = 0
+#         for grid in pattern:
+#             for num in range(1, 10):
+#                 cell = grid + str(num)
+#                 if cell not in cell_to_number_map:
+#                     flag = 0
+#                     break
+
+#             if not flag:
+#                 break
+#         if flag:
+#             # If Player 1 Can Win:
+#             canPlayer1Win = 1
+#             for grid in pattern:
+#                 if data[f'pointsOf{grid.upper()}'][0] < data[f'pointsOf{grid.upper()}'][1]:
+#                     canPlayer1Win=0
+#                     break
+             
+#             if canPlayer1Win:
+#                 # Player 1 Win Event
+#                 return;
+                
+#             canPlayer2Win = 1
+#             for grid in pattern:
+#                 if data[f'pointsOf{grid.upper()}'][0] > data[f'pointsOf{grid.upper()}'][1]:
+#                     canPlayer2Win=0
+#                     break
+
+#             if canPlayer2Win:
+#                 # Player 2 Win Event
+#                 return;
+
+#     if moves.length==81:
+#         return draw;
+
+#     return

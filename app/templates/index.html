@@ -47,6 +47,7 @@
 
                     // Game Id Should Contain The Current User In Its Record:
                     let currentUser = localStorage.getItem('currentUser');
+                    document.querySelector('#player-id').innerText=currentUser;
                     if (!(gameDetails.player1Id == currentUser || gameDetails.player2Id == currentUser)) {
                         console.error('Error:', response.statusText);
                         //Not Authorized Room Id Send To Home
@@ -176,6 +177,20 @@
             console.log(`${user_id} joined the room ${room_id}`);
             localStorage.setItem('currentUser', user_id);
         });
+
+        socket.on('wwcd',(pdata)=>{
+            if(pdata==playerId){
+                alert('You Won')
+            }else{
+                alert('You Lost')
+            }
+        })
+
+        socket.on('draw',(data)=>{
+            console.log(data);
+            alert('Match Drawn')
+            // window.location.href()
+        })
 
         socket.on('get_registered_move', async (data) => {
             console.log(data);
@@ -347,7 +362,18 @@
 
                 putLock();
 
-
+                // Fetch Updated Score
+                try {
+                    const response = await fetch(`http://localhost:5000/api/games/${gameDetails.gameId}`);
+                    if (response.ok) {
+                        gameDetails = await response.json();
+                    } else {
+                        console.error('Error:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+                socket.emit('winning_check',gameDetails)
 
             }
         }
@@ -471,8 +497,10 @@
                                 id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                                 <span class="absolute -inset-1.5"></span>
                                 <span class="sr-only">Open user menu</span>
+                                <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                                aria-current="page" id="player-id"></a>
                                 <img class="h-8 w-8 rounded-full"
-                                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                    src="https://icons.veryicon.com/png/o/miscellaneous/xdh-font-graphics-library/anonymous-user.png"
                                     alt="">
                             </button>
                         </div>

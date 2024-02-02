@@ -160,6 +160,9 @@ def update_game(gameId):
     # Retrieve the updated game data from the request
     updated_data = request.get_json()
 
+    # Score Calculation/Updates 
+    # moves=updated_data['moves']
+
     # Update the game in the MongoDB 'games' collection
     result = games_collection.update_one({'gameId': gameId}, {'$set': updated_data})
 

@@ -53,6 +53,9 @@
                         window.location.href = 'http://localhost:5000';
                         return;
                     }
+
+                    // There Should Not Be 2 Sockets Connected
+
                 } else {
                     console.error('Error:', response.statusText);
                     //Invalid Room Id Send To Home
@@ -136,6 +139,9 @@
             fillGrids();
 
             putLock();
+
+
+
         }
 
         function putLock() {
@@ -281,8 +287,9 @@
                 // REST API Call After Adding Chosen Cell To moves array
                 console.log(cellWhoseModalOpen);
                 const id = cellWhoseModalOpen.id.split('-')[1];
+                const pair = [id, numberSelectedInMove];
 
-                gameDetails.moves.push(id)
+                gameDetails.moves.push(pair);
 
                 // First Task To Update In DB
                 // PUT API Call

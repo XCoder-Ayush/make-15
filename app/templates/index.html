@@ -204,14 +204,20 @@
             }
 
             move = gameDetails.moves.length + 1;
-
+            console.log(move);
 
             // Add Event Listeners To All Cells
             for (let i = 1; i <= 9; i++) {
                 const ch = String.fromCharCode(i + 96);
                 for (let num = 1; num <= 9; num++) {
                     let gridCell = document.querySelector(`#cell-${ch}${num}`);
-                    if ((playerId == gameDetails.player1Id && move % 2 == 1 || playerId == gameDetails.player2Id && move % 2 == 0)) {
+                    console.log(move);
+                    console.log(playerId);
+                    console.log(gameDetails.player1Id);
+                    console.log(gameDetails.player2Id);
+
+                    if ((playerId == gameDetails.player1Id && move % 2 == 1) || (playerId == gameDetails.player2Id && move % 2 == 0)) {
+                        console.log('Hocche');
                         gridCell.addEventListener("click", () => {
                             openModal(ch, num);
                         });
@@ -221,14 +227,14 @@
 
             openLock();
 
-            // For Frontend Manipulation
-            if (gameDetails.player1Id == opponent) {
-                // POV : 2nd Player 
-                // Lock Should Be Opened:
-            } else {
-                // POV : 1st Player 
-                // Lock Should Be Opened
-            }
+            // // For Frontend Manipulation
+            // if (gameDetails.player1Id == opponent) {
+            //     // POV : 2nd Player 
+            //     // Lock Should Be Opened:
+            // } else {
+            //     // POV : 1st Player 
+            //     // Lock Should Be Opened
+            // }
         })
 
         function openModal(ch, num) {
@@ -289,9 +295,23 @@
                 const id = cellWhoseModalOpen.id.split('-')[1];
                 const pair = [id, numberSelectedInMove];
 
-                gameDetails.moves.push(pair);
 
                 // First Task To Update In DB
+
+                // Fetch Latest gameDetails
+                try {
+                    const response = await fetch(`http://localhost:5000/api/games/${gameDetails.gameId}`);
+                    if (response.ok) {
+                        gameDetails = await response.json();
+                    } else {
+                        console.error('Error:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+
+                gameDetails.moves.push(pair);
+
                 // PUT API Call
                 const apiUrl = `http://localhost:5000/api/games/${gameDetails.gameId}`;
 
@@ -301,9 +321,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            moves: gameDetails.moves
-                        })
+                        body: JSON.stringify(gameDetails)
                     });
 
                     if (response.ok) {

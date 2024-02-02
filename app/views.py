@@ -161,12 +161,62 @@ def update_game(gameId):
     updated_data = request.get_json()
 
     # Score Calculation/Updates 
-    # moves=updated_data['moves']
+    final_updated_data = scoreCalculation(updated_data)
+    final_updated_data.pop('_id', None)
+    # Winning Check:
+
 
     # Update the game in the MongoDB 'games' collection
-    result = games_collection.update_one({'gameId': gameId}, {'$set': updated_data})
+
+    result = games_collection.update_one({'gameId': gameId}, {'$set': final_updated_data})
 
     if result.modified_count > 0:
         return jsonify({'message': 'Game updated successfully'}), 200
     else:
         return jsonify({'error': 'Game not found or no changes were made'}), 404
+    
+
+def scoreCalculation(updated_data):
+    moves = updated_data.get('moves', [])
+    if not moves:
+        return updated_data
+    
+    last_move = updated_data.get('moves', [])[-1]
+    cell, numberInput = last_move
+    patterns = [[1, 4, 7], [2, 5, 8], [3, 6, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 5, 9], [3, 5, 7]]
+
+    grid = cell[0]
+    associatedNumber = int(cell[1])
+    
+    cell_to_number_map = {}
+    for move in moves:
+        cell, number_input = move
+        cell_to_number_map[cell] = number_input
+    
+    score=0
+
+    for pattern in patterns:
+        flag = 1  
+        pattern_sum = 0
+        if associatedNumber in pattern:
+            for num in pattern:
+                cell = grid + str(num)
+                
+                if cell not in cell_to_number_map:
+                    flag = 0
+                    break
+
+                pattern_sum += cell_to_number_map[cell]
+
+            if flag:
+                if pattern_sum == 15:
+                    score += 1
+    print('***********************************************************************')
+    print(updated_data)
+    
+    if len(moves) % 2 == 1:
+        updated_data[f'pointsOf{grid.upper()}'][0] += score
+    else:
+        updated_data[f'pointsOf{grid.upper()}'][1] += score
+
+    return updated_data

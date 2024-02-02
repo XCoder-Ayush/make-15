@@ -107,7 +107,7 @@ def handle_join_room(data):
         # Socket(Client) Joined The Room with room_id
         join_room(room_id)
         print(f'Client {user_id} joined room: {room_id}')
-        emit('room_joined', {'user_id': user_id, 'room_id': room_id},broadcast=False,room=room_id)
+        emit('room_joined', {'user_id': user_id, 'room_id': room_id},room=room_id)
     else:
         print(f'Client {user_id} is not a valid player for room {room_id}')
         emit('room_join_error', 'Invalid player for the room')

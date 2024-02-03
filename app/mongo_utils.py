@@ -5,7 +5,8 @@ def init_mongo(app):
     try:
         with app.app_context():
             mongo_uri = os.getenv('MONGO_URI')
-            # print(mongo_uri)
+            port = os.getenv('PORT')
+            print(f'Here Is The Port {port}')
             mongo.init_app(app, uri=mongo_uri)
 
             if mongo.db is not None:

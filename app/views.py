@@ -74,6 +74,7 @@ main = Blueprint("main", __name__)
 #     # User is not loggedin redirect to login page
 #     return redirect(url_for("main.login"))
 
+
 @main.route("/")
 def home():
     return render_template("visit.html")
@@ -98,6 +99,10 @@ def sendIndex(room_id):
 #     return redirect(url_for("main.login"))
 
 
+@main.route('/api/health', methods=['GET'])
+def health_check():
+    response = {'status': 'success', 'message': 'Health check passed'}
+    return jsonify(response)
 
 @main.route('/api/games', methods=['POST'])
 def create_game():

@@ -23,7 +23,8 @@ def handle_create_room(user_id):
     
     # Make API call to create a game
     PORT=os.getenv('PORT')
-
+    print(f'PORT Is {PORT}')
+    print('Before API call')
     api_url = f'http://localhost:{PORT}/api/games' 
     payload = {
         'gameId': room_id,
@@ -43,8 +44,10 @@ def handle_create_room(user_id):
     }
 
     response = requests.post(api_url, json=payload)
+    print('After API call')
     
     if response.status_code == 200:
+        print('In Success')
         # Socket(Player 1) joins the room with room_id
         # join_room(room_id)
         print(f'{user_id} Created Room: {room_id}')

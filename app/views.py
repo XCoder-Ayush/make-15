@@ -106,6 +106,7 @@ def health_check():
 
 @main.route('/api/games', methods=['POST'])
 def create_game():
+    print('IN CREATE GAME API')
     data = request.get_json()
 
     # Extract fields from the JSON data
@@ -133,8 +134,11 @@ def create_game():
     )
 
     # Insert the game document into the MongoDB 'games' collection
+    print('Before Saving To DB')
+    print(mongo)
     games_collection = mongo.db.games
     games_collection.insert_one(new_game.__dict__)
+    print('After Saving To DB')
 
     return jsonify({'message': 'Game created successfully'}), 200
 

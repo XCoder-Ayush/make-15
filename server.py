@@ -1,3 +1,4 @@
+import os
 import requests
 from app.__init__ import create_app
 # from app.extension import db 
@@ -194,7 +195,5 @@ def handle_disconnect():
 
 if __name__ == "__main__":
     app.debug = True
-    # with app.app_context():
-    #     db.create_all()
-    socketio.run(app, debug=True)
-    # app.run(host="0.0.0.0", port=8000)
+    socketio.run(app, host='0.0.0.0', port=os.getenv('PORT'), debug=True)
+

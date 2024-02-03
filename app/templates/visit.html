@@ -35,12 +35,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
         const URL = window.location.origin;
-        console.log(URL);
-        // let socket = io(URL, {transports: ['websocket']});
+        // console.log(URL);
+        let socket = io(URL, {transports: ['websocket']});
         
         // const URL = 'http://' + document.domain + ':' + location.port;
         // console.log(URL);
-        let socket = io(URL);
+        // let socket = io()
 
         let userId = undefined
         let roomToJoin = undefined

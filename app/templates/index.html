@@ -44,7 +44,7 @@
             /**
              * Check If A Game With gameId exists in DB or not
             */
-            const apiUrl = `http://${URL}/api/games/${gameId}`;
+            const apiUrl = `${URL}/api/games/${gameId}`;
             try {
                 const response = await fetch(apiUrl);
 
@@ -58,7 +58,7 @@
                     if (!(gameDetails.player1Id == currentUser || gameDetails.player2Id == currentUser)) {
                         console.error('Error:', response.statusText);
                         //Not Authorized Room Id Send To Home
-                        window.location.href = 'http://${URL}';
+                        window.location.href = '${URL}';
                         return;
                     }
 
@@ -67,7 +67,7 @@
                 } else {
                     console.error('Error:', response.statusText);
                     //Invalid Room Id Send To Home
-                    window.location.href = 'http://${URL}';
+                    window.location.href = '${URL}';
                     return;
                 }
             } catch (error) {
@@ -210,7 +210,7 @@
             frontEndManipulationOnOppMove(opponent, roomId, cellModified, input)
 
             // Fetch Latest gameDetails from DB
-            const apiUrl = `http://${URL}/api/games/${roomId}`;
+            const apiUrl = `${URL}/api/games/${roomId}`;
             try {
                 const response = await fetch(apiUrl);
                 if (response.ok) {
@@ -322,7 +322,7 @@
 
                 // Fetch Latest gameDetails
                 try {
-                    const response = await fetch(`http://${URL}/api/games/${gameDetails.gameId}`);
+                    const response = await fetch(`${URL}/api/games/${gameDetails.gameId}`);
                     if (response.ok) {
                         gameDetails = await response.json();
                     } else {
@@ -335,7 +335,7 @@
                 gameDetails.moves.push(pair);
 
                 // PUT API Call
-                const apiUrl = `http://${URL}/api/games/${gameDetails.gameId}`;
+                const apiUrl = `${URL}/api/games/${gameDetails.gameId}`;
 
                 try {
                     const response = await fetch(apiUrl, {
@@ -371,7 +371,7 @@
 
                 // Fetch Updated Score
                 try {
-                    const response = await fetch(`http://${URL}/api/games/${gameDetails.gameId}`);
+                    const response = await fetch(`${URL}/api/games/${gameDetails.gameId}`);
                     if (response.ok) {
                         gameDetails = await response.json();
                     } else {

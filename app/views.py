@@ -1,7 +1,3 @@
-import eventlet
-
-eventlet.monkey_patch()
-
 from flask import render_template, redirect, url_for, session, Blueprint,request,jsonify
 from flask_login import login_required, current_user
 from .models import Game

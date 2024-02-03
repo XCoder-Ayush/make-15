@@ -34,9 +34,13 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
-        const URL = 'http://' + document.domain + ':' + location.port;
+        const URL = window.location.origin;
         console.log(URL);
-        let socket = io.connect(URL)
+        // let socket = io(URL, {transports: ['websocket']});
+        
+        // const URL = 'http://' + document.domain + ':' + location.port;
+        // console.log(URL);
+        let socket = io(URL);
 
         let userId = undefined
         let roomToJoin = undefined

@@ -14,8 +14,13 @@
         let move = undefined;
         let playerId = undefined;
         let gameDetails = undefined;
-
-        const URL = 'http://' + document.domain + ':' + location.port;
+        
+        const URL = window.location.origin;
+        console.log(URL);
+        // let socket = io(URL, {transports: ['websocket']});
+        
+        // const URL = 'http://' + document.domain + ':' + location.port;
+        // console.log(URL);
         let socket = io(URL);
 
         document.addEventListener("DOMContentLoaded", runBeforeLoad);

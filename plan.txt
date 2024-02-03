@@ -20,3 +20,19 @@ Let's handle edge cases first
 
 
 When someone hits the link 
+
+
+Before Production:
+
+UI Customisations
+Security/Authtication
+Testing
+
+DevOps: 
+
+Cloud DB Connection
+CI/CD Pipeline - Jenkins
+Containerization
+Mode Of Deployment
+
+For Horizontal Scalability - Redis Pub/Sub

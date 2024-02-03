@@ -1,13 +1,18 @@
-# mongo_utils.py
-from flask import Flask
 from .mongo_instance import mongo
-from flask_pymongo import PyMongo
+import os
 
 def init_mongo(app):
     try:
         with app.app_context():
-            mongo.init_app(app)
-            mongo.cx.server_info()
-            print("Connected to MongoDB")
+            mongo_uri = os.getenv('MONGO_URI')
+            # print(mongo_uri)
+            mongo.init_app(app, uri=mongo_uri)
+
+            if mongo.db is not None:
+                print("Connected to MongoDB")
+                print(mongo.db)
+            else:
+                print("Not Connected To DB")
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
+        raise

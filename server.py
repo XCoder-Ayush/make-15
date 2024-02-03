@@ -179,7 +179,7 @@ def handle_winning_check(data):
                 # Player 2 Win Event
                 emit('wwcd', data.player2Id , room=data.gameId)
 
-    if moves.length==81:
+    if len(moves) == 81:
         emit('draw',{'message':'Draw'}, room=data.gameId)
 
     return

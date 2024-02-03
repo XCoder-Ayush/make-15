@@ -4,8 +4,14 @@ from .views import main
 from flask_pymongo import PyMongo
 from .mongo_utils import init_mongo
 from .mongo_instance import mongo
+from dotenv import load_dotenv
+import os
 
 
+load_dotenv()
+
+# mongodb+srv://ayush:J0cfX5NP0wfaEont@cluster0.zoznlvy.mongodb.net/?retryWrites=true&w=majority
+# MONGO_URI="mongodb://localhost:27017/make15"
 
 def create_app():
     app = Flask(__name__)
@@ -13,7 +19,7 @@ def create_app():
 
     # app.config["SECRET_KEY"] = "FesC9cBSuxakv9yN0vBY"
     
-    app.config['MONGO_URI'] = 'mongodb://localhost:27017/make15'
+    app.config['MONGO_URI'] = os.getenv('MONGO_URI')
 
     init_mongo(app)
 

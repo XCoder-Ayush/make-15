@@ -36,6 +36,6 @@ uuid==1.30
 wsproto==1.2.0
 gunicorn==20.1.0
 Flask-CORS==4.0.0
-geventwebsocket
+geventwebsocket==9.0.2
 
 

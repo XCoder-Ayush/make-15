@@ -22,7 +22,9 @@ def handle_create_room(user_id):
     room_id=get_unique_room_id();
     
     # Make API call to create a game
-    api_url = 'http://localhost:5000/api/games' 
+    PORT=os.getenv('PORT')
+
+    api_url = f'http://localhost:{PORT}/api/games' 
     payload = {
         'gameId': room_id,
         'player1Id': user_id,
@@ -56,7 +58,9 @@ def handle_create_room(user_id):
 
 def is_valid_player(user_id, room_id):
     # Call the API to get game details
-    api_url = f'http://localhost:5000/api/games/{room_id}'
+    PORT=os.getenv('PORT')
+
+    api_url = f'http://localhost:{PORT}/api/games/{room_id}'
     response = requests.get(api_url)
 
     if response.status_code == 200:
@@ -65,7 +69,7 @@ def is_valid_player(user_id, room_id):
         # Check if player1Id is an empty string
         if 'player1Id' in game_data and not game_data['player1Id']:
             # Update the game with player1Id as user_id
-            update_api_url = f'http://localhost:5000/api/games/{room_id}'
+            update_api_url = f'http://localhost:{PORT}/api/games/{room_id}'
             update_payload = {'player1Id': user_id}
             update_response = requests.put(update_api_url, json=update_payload)
 
@@ -79,7 +83,8 @@ def is_valid_player(user_id, room_id):
         # Check if player2Id is an empty string
         if 'player2Id' in game_data and not game_data['player2Id'] and game_data['player1Id'] != user_id:
             # Update the game with player2Id as user_id
-            update_api_url = f'http://localhost:5000/api/games/{room_id}'
+            PORT=os.getenv('PORT')
+            update_api_url = f'http://localhost:{PORT}/api/games/{room_id}'
             update_payload = {'player2Id': user_id}
             update_response = requests.put(update_api_url, json=update_payload)
 

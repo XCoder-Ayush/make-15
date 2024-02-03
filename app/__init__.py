@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from .views import main
 from flask_pymongo import PyMongo
@@ -16,7 +17,7 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     # app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-
+    CORS(app)
     # app.config["SECRET_KEY"] = "FesC9cBSuxakv9yN0vBY"
     
     app.config['MONGO_URI'] = os.getenv('MONGO_URI')

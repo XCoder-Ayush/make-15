@@ -127,8 +127,6 @@ def create_game():
         winner=''
     )
 
-
-
     # Insert the game document into the MongoDB 'games' collection
     games_collection = mongo.db.games
     games_collection.insert_one(new_game.__dict__)

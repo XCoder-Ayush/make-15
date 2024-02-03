@@ -135,8 +135,9 @@ def create_game():
 
     # Insert the game document into the MongoDB 'games' collection
     print('Before Saving To DB')
-    print(mongo)
+    print(mongo.db)
     games_collection = mongo.db.games
+    print(games_collection)
     games_collection.insert_one(new_game.__dict__)
     print('After Saving To DB')
 

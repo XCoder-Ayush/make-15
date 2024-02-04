@@ -1,12 +1,9 @@
-import eventlet
-
-eventlet.monkey_patch()
-
 import os
 import requests
 from app.__init__ import create_app
 # from app.extension import db 
 from flask_socketio import SocketIO, join_room, emit
+
 import uuid
 
 app = create_app()

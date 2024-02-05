@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, session, Blueprint,request,jsonify
+from flask import make_response, render_template, redirect, url_for, session, Blueprint,request,jsonify
 from flask_login import login_required, current_user
 from .models import Game
 from .mongo_instance import mongo
@@ -151,13 +151,14 @@ def get_game_details(gameId):
     if game_data:
         # Convert ObjectId to string for JSON serialization
         game_data['_id'] = str(game_data['_id'])
-
-        # Convert MongoDB document to a dictionary and return as JSON
-        return jsonify(game_data), 200
+        # Convert MongoDB document to a dictionary
+        game_dict = dict(game_data)
+        # Return the dictionary as JSON with a 200 status code
+        return make_response(jsonify(game_dict), 200)
     else:
-        return jsonify({'error': 'Game not found'}), 404
+        # Return a JSON response with a 404 status code
+        return make_response(jsonify({'error': 'Game not found'}), 404)
     
-
 
 # Sample route to update a game by gameId
 @main.route('/api/games/<string:gameId>', methods=['PUT'])
@@ -232,53 +233,95 @@ def scoreCalculation(updated_data):
 
     return updated_data
 
+@main.route("/api/moves", methods=['POST'])
+def get_valid_moves_in_cell():
+    data = request.get_json()
 
-# def winningCheck(data):
-#     patterns = [['a', 'd', 'g'], ['b', 'e', 'h'], ['c', 'f', 'i'], ['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['a', 'e', 'i'], ['c', 'e', 'g']]
-#     moves = data.get('moves', [])
-#     # if not moves:
-#     #     return 'None'
+    print('**************************Inside Get Valid Moves*****************************')
+    print(data)
+    gameId=data.get('gameId')
+    current_cell=data.get('currentCell')
+
+    game_details=get_game_details(gameId)
+    moves=game_details.json['moves']
+    # moves = game_details.get('moves', [])    
+    print(moves)
+
+    grid=current_cell[0]
+    cell_to_number_map = {}
+    for move in moves:
+        cell, number_input = move
+        cell_to_number_map[cell] = number_input    
+
+    print(cell_to_number_map)
+
+    moves_allowed=[1,2,3,4,5,6,7,8,9]
+
+
+    # Distinct Condition Check:
+
+    for num in range(1,10):
+        cell = grid + str(num)
+        if cell in cell_to_number_map:
+            moves_allowed.remove(cell_to_number_map[cell])
+
+    print('*************************After Distinct***************************')
+    print(moves_allowed)
+
+    # Prev 10 Moves Condition Check
+
+    player_1_moves = []
+    player_2_moves = []
+
+    for index, move in enumerate(moves):
+        cell, number_input = move
+        if index % 2 == 0:
+            player_1_moves.append(number_input)
+        else:
+            player_2_moves.append(number_input)
+
+    # X Y 1 2 3 4 5 6 7 8 9 10 [11th Is Okay]
+    # X+Y>=15
+
+    further_filter=False
+
+    if len(moves)%2==0:
+        for i in range(len(player_1_moves) - 1, 0, -1):
+            current_sum = player_1_moves[i] + player_1_moves[i - 1]
+            if current_sum >= 15:
+                remaining_moves = player_1_moves[i+1:]
+                if len(remaining_moves) < 10:
+                    further_filter = True
+                    break
+                if further_filter:
+                    break
+    else:
+        for i in range(len(player_2_moves) - 1, 0, -1):
+            current_sum = player_2_moves[i] + player_2_moves[i - 1]
+            if current_sum >= 15:
+                remaining_moves = player_2_moves[i+1:]
+                if len(remaining_moves) < 10:
+                    further_filter = True
+                    break
+                if further_filter:
+                    break        
     
-#     cell_to_number_map = {}
-#     for move in moves:
-#         cell, number_input = move
-#         cell_to_number_map[cell] = number_input
 
-#     for pattern in patterns:
-#         flag = 1  
-#         pattern_sum = 0
-#         for grid in pattern:
-#             for num in range(1, 10):
-#                 cell = grid + str(num)
-#                 if cell not in cell_to_number_map:
-#                     flag = 0
-#                     break
+    if further_filter:
+        last_element_player_1_moves = player_1_moves[-1]
+        last_element_player_2_moves = player_2_moves[-1]
+        if len(moves)%2==0:
+            for num in range(len(moves_allowed) - 1, -1, -1):
+                current_number = moves_allowed[num]
+                if last_element_player_1_moves + current_number >= 15:
+                    moves_allowed.pop(num)
+        else:
+            for num in range(len(moves_allowed) - 1, -1, -1):
+                current_number = moves_allowed[num]
+                if last_element_player_2_moves + current_number >= 15:
+                    moves_allowed.pop(num)                
+        
+    print('************************After All Updation****************************')
+    print(moves_allowed)
 
-#             if not flag:
-#                 break
-#         if flag:
-#             # If Player 1 Can Win:
-#             canPlayer1Win = 1
-#             for grid in pattern:
-#                 if data[f'pointsOf{grid.upper()}'][0] < data[f'pointsOf{grid.upper()}'][1]:
-#                     canPlayer1Win=0
-#                     break
-             
-#             if canPlayer1Win:
-#                 # Player 1 Win Event
-#                 return;
-                
-#             canPlayer2Win = 1
-#             for grid in pattern:
-#                 if data[f'pointsOf{grid.upper()}'][0] > data[f'pointsOf{grid.upper()}'][1]:
-#                     canPlayer2Win=0
-#                     break
-
-#             if canPlayer2Win:
-#                 # Player 2 Win Event
-#                 return;
-
-#     if moves.length==81:
-#         return draw;
-
-#     return
+    return jsonify(moves_allowed), 200

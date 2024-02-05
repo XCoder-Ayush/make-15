@@ -34,9 +34,10 @@
         // console.log(URL);
         let socket = io()
 
+        // console.log(socket);
+
         document.addEventListener("DOMContentLoaded", runBeforeLoad);
-        console.log('Upar')
-        // console.log(socket)
+
         async function runBeforeLoad() {
             // console.log('Andar')
 
@@ -145,7 +146,7 @@
                 });
             }
 
-            //Add Event Listener In Modal
+            //Add Event Listener To All The Number [1..9] Inside Modal
             for (let i = 1; i <= 9; i++) {
                 const modalNumber = document.querySelector(`#modal-${i}`);
                 modalNumber.addEventListener("click", () => {
@@ -154,14 +155,12 @@
             }
 
             function createGridCell(ch, num) {
-                // console.log(ch + num);
                 const gridCell = document.createElement("div");
                 const id = `cell-${ch}${num}`;
                 gridCell.id = id;
                 gridCell.className =
                     "h-auto w-auto border border-black shadow-lg p-4 flex items-center justify-center text-gray-300";
                 gridCell.textContent = `${ch.toUpperCase()}${num}`;
-                // gridCell.textContent = `${num}`;
                 return gridCell;
             }
 
@@ -246,6 +245,8 @@
         }
 
         function updateScorecard() {
+            document.querySelector('#player-1-in-table').innerText = gameDetails.player1Id;
+            document.querySelector('#player-2-in-table').innerText = gameDetails.player2Id;
             const tableBody = document.querySelector('tbody');
             tableBody.innerHTML = '';
 
@@ -257,29 +258,47 @@
             }
         }
 
-        function openModal(ch, num) {
+        async function openModal(ch, num) {
             cellWhoseModalOpen = document.querySelector(`#cell-${ch}${num}`);
-
             const modal = document.querySelector("#modal");
-            modal.classList.remove("hidden");
+            // Get Valid Moves From Backend
 
-            let numbersNotAllowed = [];
-            for (let i = 1; i <= 9; i++) {
-                const gridCell = document.querySelector(`#cell-${ch}${i}`);
-                const content = gridCell.innerText;
-                // console.log(content);
-                if (/^\d$/.test(content)) {
-                    // If content is a single digit number
-                    numbersNotAllowed.push(gridCell.innerText);
-                } else if (/^[A-I][1-9]$/.test(content)) {
-                    // console.log("Fuckk");
-                } else {
-                    // Handle other cases if needed
-                    console.log("Not Possible. Bug!!!");
-                }
-            }
+            // 1. Check Which Numbers Are There In Cell Already
+            // 2. Check Which   
+            const response = await fetch(`${URL}/api/moves`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: gameDetails.gameId,
+                    currentCell: `${ch}${num}`,
+                }),
+            });
 
-            console.log(numbersNotAllowed);
+            const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            const numbersAllowed = await response.json();
+            console.log(numbersAllowed);
+
+
+            const numbersNotAllowed = allNumbers.filter(number => !numbersAllowed.includes(number));
+            // for (let i = 1; i <= 9; i++) {
+            //     const gridCell = document.querySelector(`#cell-${ch}${i}`);
+            //     const content = gridCell.innerText;
+            //     // console.log(content);
+            //     if (/^\d$/.test(content)) {
+            //         // If content is a single digit number
+            //         numbersNotAllowed.push(gridCell.innerText);
+            //     } else if (/^[A-I][1-9]$/.test(content)) {
+            //         // console.log("Fuckk");
+            //     } else {
+            //         // Handle other cases if needed
+            //         console.log("Not Possible. Bug!!!");
+            //     }
+            // }
+
+            // console.log(numbersNotAllowed);
 
             numbersNotAllowed.forEach((number) => {
                 const modalCell = document.querySelector(`#modal-${number}`);
@@ -289,6 +308,9 @@
                 modalCell.style.cursor = "not-allowed";
                 modalCell.style.pointerEvents = "none";
             });
+
+            // Unhide The Modal After All Processing
+            modal.classList.remove("hidden");
         }
 
         function closeModal() {
@@ -315,8 +337,11 @@
                 const id = cellWhoseModalOpen.id.split('-')[1];
                 const pair = [id, numberSelectedInMove];
 
-                // First Task To Update In DB
-                // Fetch Latest gameDetails
+                // First Task To Update Move In DB
+                // I Should Trust Only DB Since Frontend Objects Can Be Manipulated
+
+                // Fetch Latest gameDetails From DB
+
                 try {
                     const response = await fetch(`${URL}/api/games/${gameDetails.gameId}`);
                     if (response.ok) {
@@ -390,6 +415,7 @@
                 timeout: 1000,
                 progressBar: true,
             }).show();
+
             cellWhoseModalOpen.innerText = numberSelectedInMove;
             // Remove the abbrevation
             cellWhoseModalOpen.classList.remove("text-gray-300");
@@ -538,22 +564,22 @@
             }
             if (winnerId == playerId) {
                 new Noty({
-                type: 'success',
-                text: `You Won Square ${grid.toUpperCase()}`,
-                layout: 'topRight',
-                theme: 'metroui',
-                timeout: 1500,
-                progressBar: true,
-            }).show();
+                    type: 'success',
+                    text: `You Won Square ${grid.toUpperCase()}`,
+                    layout: 'topRight',
+                    theme: 'metroui',
+                    timeout: 1500,
+                    progressBar: true,
+                }).show();
             } else {
                 new Noty({
-                type: 'error',
-                text: `You Lost Square ${grid.toUpperCase()}`,
-                layout: 'topRight',
-                theme: 'metroui',
-                timeout: 1500,
-                progressBar: true,
-            }).show();
+                    type: 'error',
+                    text: `You Lost Square ${grid.toUpperCase()}`,
+                    layout: 'topRight',
+                    theme: 'metroui',
+                    timeout: 1500,
+                    progressBar: true,
+                }).show();
             }
         })
 

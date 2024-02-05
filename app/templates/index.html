@@ -479,7 +479,7 @@
             console.log(`${user_id} joined the room ${room_id}`);
 
             // Fetch Latest gameDetails from DB
-            const apiUrl = `${URL}/api/games/${roomId}`;
+            const apiUrl = `${URL}/api/games/${room_id}`;
             try {
                 const response = await fetch(apiUrl);
                 if (response.ok) {

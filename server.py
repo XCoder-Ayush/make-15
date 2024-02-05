@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from app.__init__ import create_app
 # from app.extension import db 
@@ -146,55 +147,123 @@ def handle_register_move(data):
 
 @socketio.on('winning_check')
 def handle_winning_check(data):
+    print('**************************Inside Winning Check***************************************')
     patterns = [['a', 'd', 'g'], ['b', 'e', 'h'], ['c', 'f', 'i'], ['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i'], ['a', 'e', 'i'], ['c', 'e', 'g']]
     moves = data.get('moves', [])
     if not moves:
         return
     
+    wonSquare = handle_square_winning(data)
+    if not wonSquare:
+        # DRAW CHECK
+        print('No One Won, Lets Check For Draw')
+        if len(moves) == 81:
+            print('Match Drawn')
+            emit('draw',{'message':'Draw'}, room=data.get('gameId'))
+            return
+    else:
+        time.sleep(1)
+        print(moves)
+        cell_to_number_map = {}
+        for move in moves:
+            cell, number_input = move
+            cell_to_number_map[cell] = number_input
+
+        print('Move Map')
+        print(cell_to_number_map)
+
+        for pattern in patterns:
+            notPresentInMove = 1  
+            for grid in pattern:
+                for num in range(1, 10):
+                    cell = grid + str(num)
+                    if cell not in cell_to_number_map:
+                        notPresentInMove = 0
+                        break
+
+                if not notPresentInMove:
+                    break
+            if notPresentInMove :
+                print('Cell Complete Nahi Hua')
+            else:
+                print('Maybe Someone Could Win')
+            
+            if notPresentInMove:
+                # If Player 1 Can Win:
+                canPlayer1Win = 1
+                for grid in pattern:
+                    if data.get(f'pointsOf{grid.upper()}')[0] <= data.get(f'pointsOf{grid.upper()}')[1]:
+                        canPlayer1Win=0
+                        break
+                
+                if canPlayer1Win:
+                    # Player 1 Win Event
+                    print('Player 1 Wins')
+                    emit('wwcd', data.get('player1Id') , room=data.get('gameId'))
+                    return
+                    
+                canPlayer2Win = 1
+                for grid in pattern:
+                    if data.get(f'pointsOf{grid.upper()}')[0] >= data.get(f'pointsOf{grid.upper()}')[1]:
+                        canPlayer2Win=0
+                        break
+
+                if canPlayer2Win:
+                    # Player 2 Win Event
+                    print('Player 2 Wins')
+                    emit('wwcd', data.get('player2Id') , room=data.get('gameId'))
+                    return
+
+        print('No One Won, Lets Check For Draw')
+        if len(moves) == 81:
+            print('Match Drawn')
+            emit('draw',{'message':'Draw'}, room=data.get('gameId'))
+            return
+
+    print('**************************Exiting Winning Check*****************************************')
+    return
+
+
+# @socketio.on('square_winning_check')
+def handle_square_winning(data):
+    moves = data.get('moves', [])
+    if not moves:
+        return False
+    print('****************************Inside Square Win Check*****************************************')
     cell_to_number_map = {}
     for move in moves:
         cell, number_input = move
         cell_to_number_map[cell] = number_input
 
-    for pattern in patterns:
-        flag = 1  
-        for grid in pattern:
-            for num in range(1, 10):
-                cell = grid + str(num)
-                if cell not in cell_to_number_map:
-                    flag = 0
-                    break
+    print(cell_to_number_map)
+    last_grid,last_input = moves[len(moves) - 1]
+    last_grid=last_grid[0]
+    print(last_grid)
 
-            if not flag:
-                break
-        if flag:
-            # If Player 1 Can Win:
-            canPlayer1Win = 1
-            for grid in pattern:
-                if data[f'pointsOf{grid.upper()}'][0] < data[f'pointsOf{grid.upper()}'][1]:
-                    canPlayer1Win=0
-                    break
-             
-            if canPlayer1Win:
-                # Player 1 Win Event
-                emit('wwcd', data.player1Id , room=data.gameId)
-                
-            canPlayer2Win = 1
-            for grid in pattern:
-                if data[f'pointsOf{grid.upper()}'][0] > data[f'pointsOf{grid.upper()}'][1]:
-                    canPlayer2Win=0
-                    break
+    someoneWon=1
+    for num in range(1,10):
+        cell = last_grid + str(num)
+        if cell not in cell_to_number_map:
+            someoneWon = 0
+            break    
+    
+    if not someoneWon:
+        return False
+    
+    print('All Cells Filled')
 
-            if canPlayer2Win:
-                # Player 2 Win Event
-                emit('wwcd', data.player2Id , room=data.gameId)
-
-    if len(moves) == 81:
-        emit('draw',{'message':'Draw'}, room=data.gameId)
-
-    return
-
-
+    if data.get(f'pointsOf{last_grid.upper()}')[0] > data.get(f'pointsOf{last_grid.upper()}')[1]:
+        print('Player 1 Won')
+        emit('square_won_check',{'winner':data.get('player1Id'),'square':last_grid}, room=data.get('gameId'))
+        return True
+    
+    if data.get(f'pointsOf{last_grid.upper()}')[0] < data.get(f'pointsOf{last_grid.upper()}')[1]:
+        print('Player 2 Won')
+        emit('square_won_check',{'winner':data.get('player2Id'),'square':last_grid}, room=data.get('gameId'))
+        return True
+        
+    print('Exiting')
+    return False;
 # This event is triggered when a client disconnects from the server via WebSocket
 @socketio.on('disconnect')
 def handle_disconnect():

@@ -259,6 +259,7 @@
         function updateScorecard() {
             document.querySelector('#player-1-in-table').innerText = gameDetails.player1Id;
             document.querySelector('#player-2-in-table').innerText = gameDetails.player2Id;
+            console.log('HERE' + document.querySelector('#player-2-in-table').innerText);
             const tableBody = document.querySelector('tbody');
             tableBody.innerHTML = '';
 
@@ -502,7 +503,7 @@
             console.log(`${user_id} joined the room ${room_id}`);
 
             // Fetch Latest gameDetails from DB
-            const apiUrl = `${URL}/api/games/${roomId}`;
+            const apiUrl = `${URL}/api/games/${room_id}`;
             try {
                 const response = await fetch(apiUrl);
                 if (response.ok) {
@@ -516,6 +517,7 @@
             } catch (error) {
                 console.error('Error:', error);
             }
+
             updateScorecard()
         });
 

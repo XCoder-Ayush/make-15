@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css"
         integrity="sha512-NXUhxhkDgZYOMjaIgd89zF2w51Mub53Ru3zCNp5LTlEzMbNNAjTjDbpURYGS5Mop2cU4b7re1nOIucsVlrx9fA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <script>
         let cellWhoseModalOpen = undefined;
         let numberSelectedInMove = undefined;
@@ -37,9 +36,9 @@
 
         // console.log(socket);
 
-        document.addEventListener("DOMContentLoaded", runBeforeLoad);
+        document.addEventListener("DOMContentLoaded", runAfterDOMLoad);
 
-        async function runBeforeLoad() {
+        async function runAfterDOMLoad() {
             // console.log('Andar')
 
             // const URL='http://' + document.domain + ':' + location.port;
@@ -188,6 +187,7 @@
             document.querySelector('#player-1-in-table').innerText = gameDetails.player1Id;
             document.querySelector('#player-2-in-table').innerText = gameDetails.player2Id;
             document.querySelector('#scorecard-btn').addEventListener('click', openScorecard);
+
             let overlays = document.querySelectorAll('.overlay');
             const scorecard = document.getElementById('scorecard');
 
@@ -198,6 +198,14 @@
             function openScorecard() {
                 scorecard.classList.remove('hidden');
             }
+            // console.log(document.querySelector('#close-scorecard'));
+            // document.querySelector('#close-scorecard').addEventListener('click', () => {
+            //     console.log('HERE');
+            // });
+            console.log(overlays);
+            // document.querySelector('.fa-circle-xmark.overlay').addEventListener('click', () => {
+            //     console.log('HERE');
+            // });
 
             overlays.forEach((overlay) => {
                 overlay.addEventListener('click', closeScorecard);
@@ -209,6 +217,9 @@
 
             updateScorecard();
 
+            document.querySelector('#redirect-btn').addEventListener('click', () => {
+                window.location.href = `${URL}`
+            })
         }
 
         function putLock() {
@@ -238,10 +249,10 @@
             const tableBody = document.querySelector('tbody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td class="whitespace-nowrap px-6 py-4 font-medium">${dataA}</td>
-                <td class="whitespace-nowrap px-6 py-4">${dataB}</td>
-                <td class="whitespace-nowrap px-6 py-4">${dataC}</td>
-            `;
+                    <td class="whitespace-nowrap px-6 py-4 font-medium">${dataA}</td>
+                    <td class="whitespace-nowrap px-6 py-4">${dataB}</td>
+                    <td class="whitespace-nowrap px-6 py-4">${dataC}</td>
+                `;
             tableBody.appendChild(newRow);
         }
 
@@ -505,23 +516,34 @@
             } catch (error) {
                 console.error('Error:', error);
             }
-            
             updateScorecard()
         });
 
         socket.on('wwcd', (pdata) => {
+
             if (pdata == playerId) {
-                alert('You Won')
+                // alert('You Won')
+                document.querySelector('#result-text').innerText = 'Congratulations!! You Won The Game';
+                document.querySelector('#won-image').classList.remove('hidden');
+
             } else {
-                alert('You Lost')
+                // alert('You Lost')
+                document.querySelector('#result-text').innerText = 'You Lost The Game. Better Luck Next Time :)';
+                document.querySelector('#lost-image').classList.remove('hidden');
             }
-            window.location.href = `${URL}`
+            // window.location.href = `${URL}`
+            document.querySelector('#result-modal').classList.remove('hidden');
+
         })
 
         socket.on('draw', (data) => {
             console.log(data);
-            alert('Match Drawn')
-            window.location.href = `${URL}`
+            // alert('Match Drawn')
+            // window.location.href = `${URL}`
+            document.querySelector('#result-text').innerText = 'The Match Has Drawn. Better Luck Next Time :)';
+            document.querySelector('#won-image').classList.remove('hidden');
+            document.querySelector('#result-modal').classList.remove('hidden');
+
         })
 
         socket.on('get_registered_move', async (data) => {
@@ -820,6 +842,8 @@
     </div>
 
     <!-- Scoreboard -->
+
+
     <div class="relative hidden z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" id="scorecard">
 
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity overlay"></div>
@@ -829,7 +853,17 @@
 
                 <div
                     class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <div class="w-full text-center font-bold mt-5">Points Table</div>
+                    <!-- <div class="absolute top-3 right-3 o overlay">
+                        <i class="fa-solid fa-circle-xmark fa-xl "></i>
+                        <p>X</p>
+                    </div> -->
+                    <i
+                        class="fa-solid fa-circle-xmark fa-xl overlay absolute top-6 right-3 hover:scale-110 hover:cursor-pointer"></i>
+
+
+                    <div class="w-full text-center font-bold mt-5 relative">
+                        <p>Points Table</p>
+                    </div>
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="flex flex-col">
                             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -860,10 +894,56 @@
         </div>
     </div>
 
-    </div>
-    <script>
 
-    </script>
+    <!-- Win Lose Or Tie, India Till I Die -->
+
+    <div class="relative z-10 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true" id="result-modal">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+
+                <div
+                    class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="hidden mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+                                id="lost-image">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                            </div>
+
+                            <div class="hidden mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10"
+                                id="won-image">
+                                <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"
+                                    class="oc se axx">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5">
+                                    </path>
+                                </svg>
+                            </div>
+
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Game
+                                    Finished</h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500" id="result-text"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button"
+                            class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                            id="redirect-btn">Exit Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

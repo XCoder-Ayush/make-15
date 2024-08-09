@@ -1,0 +1,14 @@
+version: "3"
+services:
+  web:
+    image: make-15
+    environment:
+      FLASK_DEBUG: 1
+      FLASK_ENV: development
+      FLASK_APP: server.py
+    ports:
+      - "5000:5000"
+    entrypoint:
+      - flask
+      - run
+      - --host=0.0.0.0

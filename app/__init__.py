@@ -11,9 +11,6 @@ import os
 
 load_dotenv()
 
-# mongodb+srv://ayush:J0cfX5NP0wfaEont@cluster0.zoznlvy.mongodb.net/?retryWrites=true&w=majority
-# MONGO_URI="mongodb://localhost:27017/make15"
-
 def create_app():
     app = Flask(__name__)
     # app.config["SQLALCHEMY_DATABASE_URI"] = db_url

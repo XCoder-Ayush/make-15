@@ -17,13 +17,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css"
         integrity="sha512-NXUhxhkDgZYOMjaIgd89zF2w51Mub53Ru3zCNp5LTlEzMbNNAjTjDbpURYGS5Mop2cU4b7re1nOIucsVlrx9fA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <script>
         let cellWhoseModalOpen = undefined;
         let numberSelectedInMove = undefined;
         let move = undefined;
         let playerId = undefined;
         let gameDetails = undefined;
+
 
         const URL = window.location.origin;
         // console.log(URL);
@@ -38,6 +38,9 @@
         async function runBeforeLoad() {
 
             const gameId = window.location.pathname.split('/').pop();
+
+            document.querySelector('#copy-id').innerText = gameId;
+
 
             document.querySelector('#copy-id').innerText = gameId;
 
@@ -69,10 +72,37 @@
             });
 
 
+
+            //Button Copy 
+            const contentContainer = document.querySelector('#copy-div');
+            const copyButton = document.getElementById('copyButton');
+
+            copyButton.addEventListener('click', function () {
+                const textarea = document.createElement('textarea');
+                textarea.value = contentContainer.textContent;
+                document.body.appendChild(textarea);
+
+                textarea.select();
+                document.execCommand('copy');
+
+                document.body.removeChild(textarea);
+
+                new Noty({
+                    type: 'info',
+                    text: 'Room Id Copied',
+                    layout: 'topRight',
+                    theme: 'metroui',
+                    timeout: 1000,
+                    progressBar: true,
+                }).show();
+            });
+
+
             /**
              * Check If A Game With gameId exists in DB or not
             */
             const apiUrl = `${URL}/api/games/${gameId}`;
+
 
             try {
                 const response = await fetch(apiUrl);
